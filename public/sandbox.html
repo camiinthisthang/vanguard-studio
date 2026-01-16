@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>p5.js Sandbox</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #1a1a2e;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    #error-display {
+      position: fixed;
+      bottom: 16px;
+      left: 16px;
+      right: 16px;
+      background: #fee2e2;
+      border: 1px solid #fecaca;
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-family: system-ui, -apple-system, sans-serif;
+      font-size: 14px;
+      color: #991b1b;
+      display: none;
+      z-index: 1000;
+    }
+
+    #placeholder {
+      text-align: center;
+      color: #64748b;
+      font-family: system-ui, -apple-system, sans-serif;
+      padding: 40px;
+    }
+
+    #placeholder h2 {
+      font-size: 18px;
+      margin-bottom: 8px;
+      color: #94a3b8;
+    }
+
+    #placeholder p {
+      font-size: 14px;
+    }
+
+    canvas {
+      border-radius: 8px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+  </style>
+</head>
+<body>
+  <div id="placeholder">
+    <h2>Your creation will appear here</h2>
+    <p>Type something in the chat to get started!</p>
+  </div>
+  <div id="error-display"></div>
+
+  <script>
+    let currentSketch = null;
+
+    // Listen for code from parent window
+    window.addEventListener('message', function(event) {
+      const { type, code } = event.data;
+
+      if (type === 'run-code') {
+        runCode(code);
+      }
+    });
+
+    function runCode(code) {
+      // Clear any existing error
+      const errorDisplay = document.getElementById('error-display');
+      errorDisplay.style.display = 'none';
+
+      // Remove placeholder
+      const placeholder = document.getElementById('placeholder');
+      if (placeholder) {
+        placeholder.style.display = 'none';
+      }
+
+      // Remove existing sketch if any
+      if (currentSketch) {
+        currentSketch.remove();
+        currentSketch = null;
+      }
+
+      // Remove any existing canvas
+      const existingCanvas = document.querySelector('canvas');
+      if (existingCanvas) {
+        existingCanvas.remove();
+      }
+
+      try {
+        // Create a new p5 instance with the user's code
+        // We wrap in instance mode for better isolation
+        const sketchCode = `
+          (function(p) {
+            ${code}
+
+            // Bind p5 functions to the instance
+            if (typeof setup === 'function') p.setup = setup;
+            if (typeof draw === 'function') p.draw = draw;
+            if (typeof mousePressed === 'function') p.mousePressed = mousePressed;
+            if (typeof mouseReleased === 'function') p.mouseReleased = mouseReleased;
+            if (typeof mouseMoved === 'function') p.mouseMoved = mouseMoved;
+            if (typeof mouseDragged === 'function') p.mouseDragged = mouseDragged;
+            if (typeof keyPressed === 'function') p.keyPressed = keyPressed;
+            if (typeof keyReleased === 'function') p.keyReleased = keyReleased;
+            if (typeof keyTyped === 'function') p.keyTyped = keyTyped;
+          })
+        `;
+
+        // Evaluate and get the sketch function
+        const sketchFn = eval(sketchCode);
+
+        // Create p5 instance
+        currentSketch = new p5(function(p) {
+          // Expose all p5 functions globally for the user code
+          window.createCanvas = p.createCanvas.bind(p);
+          window.background = p.background.bind(p);
+          window.fill = p.fill.bind(p);
+          window.noFill = p.noFill.bind(p);
+          window.stroke = p.stroke.bind(p);
+          window.noStroke = p.noStroke.bind(p);
+          window.strokeWeight = p.strokeWeight.bind(p);
+          window.rect = p.rect.bind(p);
+          window.ellipse = p.ellipse.bind(p);
+          window.circle = p.circle.bind(p);
+          window.line = p.line.bind(p);
+          window.point = p.point.bind(p);
+          window.triangle = p.triangle.bind(p);
+          window.quad = p.quad.bind(p);
+          window.arc = p.arc.bind(p);
+          window.square = p.square.bind(p);
+          window.text = p.text.bind(p);
+          window.textSize = p.textSize.bind(p);
+          window.textAlign = p.textAlign.bind(p);
+          window.textFont = p.textFont.bind(p);
+          window.push = p.push.bind(p);
+          window.pop = p.pop.bind(p);
+          window.translate = p.translate.bind(p);
+          window.rotate = p.rotate.bind(p);
+          window.scale = p.scale.bind(p);
+          window.random = p.random.bind(p);
+          window.noise = p.noise.bind(p);
+          window.map = p.map.bind(p);
+          window.constrain = p.constrain.bind(p);
+          window.dist = p.dist.bind(p);
+          window.abs = Math.abs;
+          window.sin = p.sin.bind(p);
+          window.cos = p.cos.bind(p);
+          window.tan = p.tan.bind(p);
+          window.sqrt = Math.sqrt;
+          window.pow = Math.pow;
+          window.floor = Math.floor;
+          window.ceil = Math.ceil;
+          window.round = Math.round;
+          window.min = Math.min;
+          window.max = Math.max;
+          window.lerp = p.lerp.bind(p);
+          window.color = p.color.bind(p);
+          window.lerpColor = p.lerpColor.bind(p);
+          window.red = p.red.bind(p);
+          window.green = p.green.bind(p);
+          window.blue = p.blue.bind(p);
+          window.alpha = p.alpha.bind(p);
+          window.hue = p.hue.bind(p);
+          window.saturation = p.saturation.bind(p);
+          window.brightness = p.brightness.bind(p);
+          window.colorMode = p.colorMode.bind(p);
+          window.beginShape = p.beginShape.bind(p);
+          window.endShape = p.endShape.bind(p);
+          window.vertex = p.vertex.bind(p);
+          window.curveVertex = p.curveVertex.bind(p);
+          window.bezierVertex = p.bezierVertex.bind(p);
+          window.image = p.image.bind(p);
+          window.loadImage = p.loadImage.bind(p);
+          window.tint = p.tint.bind(p);
+          window.noTint = p.noTint.bind(p);
+          window.frameRate = p.frameRate.bind(p);
+          window.noLoop = p.noLoop.bind(p);
+          window.loop = p.loop.bind(p);
+          window.redraw = p.redraw.bind(p);
+          window.cursor = p.cursor.bind(p);
+          window.noCursor = p.noCursor.bind(p);
+          window.rectMode = p.rectMode.bind(p);
+          window.ellipseMode = p.ellipseMode.bind(p);
+          window.angleMode = p.angleMode.bind(p);
+          window.radians = p.radians.bind(p);
+          window.degrees = p.degrees.bind(p);
+
+          // Constants
+          window.PI = p.PI;
+          window.TWO_PI = p.TWO_PI;
+          window.HALF_PI = p.HALF_PI;
+          window.QUARTER_PI = p.QUARTER_PI;
+          window.CENTER = p.CENTER;
+          window.LEFT = p.LEFT;
+          window.RIGHT = p.RIGHT;
+          window.TOP = p.TOP;
+          window.BOTTOM = p.BOTTOM;
+          window.CORNER = p.CORNER;
+          window.CORNERS = p.CORNERS;
+          window.RADIUS = p.RADIUS;
+          window.CLOSE = p.CLOSE;
+          window.RGB = p.RGB;
+          window.HSB = p.HSB;
+          window.HSL = p.HSL;
+          window.DEGREES = p.DEGREES;
+          window.RADIANS = p.RADIANS;
+
+          // System variables (updated each frame via getters)
+          Object.defineProperty(window, 'mouseX', { get: () => p.mouseX, configurable: true });
+          Object.defineProperty(window, 'mouseY', { get: () => p.mouseY, configurable: true });
+          Object.defineProperty(window, 'pmouseX', { get: () => p.pmouseX, configurable: true });
+          Object.defineProperty(window, 'pmouseY', { get: () => p.pmouseY, configurable: true });
+          Object.defineProperty(window, 'mouseIsPressed', { get: () => p.mouseIsPressed, configurable: true });
+          Object.defineProperty(window, 'keyIsPressed', { get: () => p.keyIsPressed, configurable: true });
+          Object.defineProperty(window, 'key', { get: () => p.key, configurable: true });
+          Object.defineProperty(window, 'keyCode', { get: () => p.keyCode, configurable: true });
+          Object.defineProperty(window, 'width', { get: () => p.width, configurable: true });
+          Object.defineProperty(window, 'height', { get: () => p.height, configurable: true });
+          Object.defineProperty(window, 'frameCount', { get: () => p.frameCount, configurable: true });
+          Object.defineProperty(window, 'deltaTime', { get: () => p.deltaTime, configurable: true });
+
+          // Key codes
+          window.BACKSPACE = p.BACKSPACE;
+          window.DELETE = p.DELETE;
+          window.ENTER = p.ENTER;
+          window.RETURN = p.RETURN;
+          window.TAB = p.TAB;
+          window.ESCAPE = p.ESCAPE;
+          window.SHIFT = p.SHIFT;
+          window.CONTROL = p.CONTROL;
+          window.OPTION = p.OPTION;
+          window.ALT = p.ALT;
+          window.UP_ARROW = p.UP_ARROW;
+          window.DOWN_ARROW = p.DOWN_ARROW;
+          window.LEFT_ARROW = p.LEFT_ARROW;
+          window.RIGHT_ARROW = p.RIGHT_ARROW;
+
+          // Run the user's code
+          sketchFn(p);
+        });
+
+        // Notify parent that code ran successfully
+        window.parent.postMessage({ type: 'success' }, '*');
+
+      } catch (error) {
+        showError(error.message);
+      }
+    }
+
+    function showError(message) {
+      const errorDisplay = document.getElementById('error-display');
+
+      // Clean up the error message - remove "Uncaught" prefix and error type
+      let cleanMessage = message
+        .replace(/^Uncaught\s+/i, '')
+        .replace(/^(ReferenceError|TypeError|SyntaxError|Error):\s*/i, '');
+
+      // Make error message kid-friendly
+      let friendlyMessage = "Oops! Something went wrong. ";
+
+      if (cleanMessage.includes('is not defined')) {
+        // Extract the actual variable name (first word before "is not defined")
+        const match = cleanMessage.match(/^(\w+)\s+is not defined/);
+        const varName = match ? match[1] : 'something';
+        friendlyMessage += `I don't recognize "${varName}". Try asking: "Can you fix the ${varName} error?"`;
+      } else if (message.includes('Unexpected token') || message.includes('Unexpected identifier')) {
+        friendlyMessage += "There might be a typo in the code. Try asking: \"Can you fix the syntax error?\"";
+      } else if (message.includes('Cannot read') || message.includes('undefined')) {
+        friendlyMessage += "Something is missing or not ready yet. Try asking: \"Can you fix this error?\"";
+      } else if (message.includes('is not a function')) {
+        const match = cleanMessage.match(/(\w+)\s+is not a function/);
+        const fnName = match ? match[1] : 'something';
+        friendlyMessage += `"${fnName}" isn't working as expected. Try asking: "Can you fix the ${fnName} function?"`;
+      } else if (message.includes('maximum call stack') || message.includes('too much recursion')) {
+        friendlyMessage += "The code is running in circles! Try asking: \"Can you fix the infinite loop?\"";
+      } else {
+        friendlyMessage += "Try asking: \"Can you help me fix this error?\"";
+      }
+
+      errorDisplay.textContent = friendlyMessage;
+      errorDisplay.style.display = 'block';
+
+      // Notify parent of error
+      window.parent.postMessage({ type: 'error', message: friendlyMessage }, '*');
+    }
+
+    // Catch runtime errors
+    window.onerror = function(message, source, lineno, colno, error) {
+      showError(message);
+      return true;
+    };
+  </script>
+</body>
+</html>
