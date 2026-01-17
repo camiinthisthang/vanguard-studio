@@ -65,8 +65,8 @@ export function ProjectHeader({
                 if (e.key === "Enter") handleSave();
                 if (e.key === "Escape") handleCancel();
               }}
-              className="px-2 py-1 text-lg font-semibold border border-violet-300 rounded-lg
-                         focus:outline-none focus:ring-2 focus:ring-violet-500"
+              className="px-2 py-1 text-lg font-semibold border border-blue-300 rounded-lg
+                         focus:outline-none focus:ring-2 focus:ring-blue-500"
               autoFocus
             />
             <button
@@ -114,8 +114,8 @@ export function ProjectHeader({
         <button
           onClick={onSave}
           disabled={isSaving}
-          className="flex items-center gap-2 px-3 py-1.5 text-sm text-white bg-violet-600
-                     hover:bg-violet-700 rounded-lg transition-colors disabled:opacity-50"
+          className="flex items-center gap-2 px-3 py-1.5 text-sm text-white bg-blue-600
+                     hover:bg-blue-700 rounded-lg transition-colors disabled:opacity-50"
         >
           <Save size={16} />
           {isSaving ? "Saving..." : "Save"}

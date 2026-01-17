@@ -122,7 +122,7 @@ export function CanvasPanel({ code, onError, isGenerating = false }: CanvasPanel
             <div className="absolute inset-0 flex items-center justify-center">
               <Sparkles
                 size={48}
-                className="text-violet-400 animate-pulse"
+                className="text-blue-400 animate-pulse"
               />
             </div>
             {/* Orbiting dots */}
@@ -150,7 +150,7 @@ export function CanvasPanel({ code, onError, isGenerating = false }: CanvasPanel
             {[0, 1, 2].map((i) => (
               <div
                 key={i}
-                className="w-2 h-2 bg-violet-500 rounded-full animate-bounce"
+                className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"
                 style={{ animationDelay: `${i * 150}ms` }}
               />
             ))}

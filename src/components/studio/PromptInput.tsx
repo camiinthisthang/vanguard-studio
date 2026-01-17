@@ -41,7 +41,7 @@ export function PromptInput({
           disabled={isLoading}
           rows={1}
           className="flex-1 resize-none rounded-xl border border-gray-200 px-4 py-3 text-sm
-                     focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent
+                     focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
                      disabled:bg-gray-50 disabled:text-gray-400
                      placeholder:text-gray-400"
           style={{ minHeight: "48px", maxHeight: "120px" }}
@@ -49,8 +49,8 @@ export function PromptInput({
         <button
           onClick={handleSubmit}
           disabled={!value.trim() || isLoading}
-          className="w-12 h-12 rounded-xl bg-violet-600 text-white flex items-center justify-center
-                     hover:bg-violet-700 transition-colors
+          className="w-12 h-12 rounded-xl bg-blue-600 text-white flex items-center justify-center
+                     hover:bg-blue-700 transition-colors
                      disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed"
         >
           {isLoading ? (
