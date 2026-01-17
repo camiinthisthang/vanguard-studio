@@ -116,14 +116,16 @@ export function CanvasPanel({ code, onError, isGenerating = false }: CanvasPanel
         </div>
       </div>
 
-      {/* Canvas */}
-      <div className="flex-1 flex items-center justify-center p-4 overflow-hidden">
-        <div className="relative w-full h-full max-w-[420px] max-h-[420px]">
+      {/* Canvas - container that scales to fit available space */}
+      <div className="flex-1 flex items-center justify-center p-2 min-h-0 min-w-0 overflow-hidden">
+        <div
+          className="relative rounded-lg overflow-hidden bg-white h-full aspect-square max-w-full"
+        >
           <iframe
             ref={iframeRef}
             src="/sandbox.html"
             sandbox="allow-scripts allow-same-origin"
-            className="w-full h-full rounded-lg"
+            className="w-full h-full"
             style={{ border: "none" }}
           />
 

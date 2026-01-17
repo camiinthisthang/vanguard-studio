@@ -205,15 +205,7 @@ export function CodePanel({ code, previousCode, onChange }: CodePanelProps) {
         }, 100);
       }
 
-      // Auto-clear highlights after 15 seconds (longer for review)
-      const timer = setTimeout(() => {
-        editorView.dispatch({
-          effects: setHighlightedLines.of(new Set()),
-        });
-        setShowingChanges(false);
-      }, 15000);
-
-      return () => clearTimeout(timer);
+      // Highlighting persists until user clicks "Clear" or new code is generated
     }
   }, [editorView, changedLines, changeBlocks]);
 
