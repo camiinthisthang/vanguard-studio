@@ -1,23 +1,20 @@
 "use client";
 
-import { Save, Plus, Pencil, Check, X } from "lucide-react";
+import { Plus, Pencil, Check, X, Cloud, Image as ImageIcon } from "lucide-react";
 import { useState } from "react";
+import Link from "next/link";
 
 interface ProjectHeaderProps {
   projectName: string;
   onNameChange: (name: string) => void;
-  onSave: () => void;
   onNew: () => void;
-  isSaving?: boolean;
   lastSaved?: Date | null;
 }
 
 export function ProjectHeader({
   projectName,
   onNameChange,
-  onSave,
   onNew,
-  isSaving = false,
   lastSaved,
 }: ProjectHeaderProps) {
   const [isEditing, setIsEditing] = useState(false);
@@ -102,23 +99,30 @@ export function ProjectHeader({
       </div>
 
       {/* Actions */}
-      <div className="flex items-center gap-2">
-        <button
-          onClick={onNew}
+      <div className="flex items-center gap-3">
+        {/* Auto-save indicator */}
+        <div className="flex items-center gap-1.5 text-xs text-gray-400">
+          <Cloud size={14} className="text-green-500" />
+          <span>Auto-saved</span>
+        </div>
+
+        <div className="w-px h-5 bg-gray-200" />
+
+        <Link
+          href="/gallery"
           className="flex items-center gap-2 px-3 py-1.5 text-sm text-gray-600
                      hover:bg-gray-100 rounded-lg transition-colors"
         >
+          <ImageIcon size={16} />
+          My Sketches
+        </Link>
+        <button
+          onClick={onNew}
+          className="flex items-center gap-2 px-3 py-1.5 text-sm text-white bg-blue-600
+                     hover:bg-blue-700 rounded-lg transition-colors"
+        >
           <Plus size={16} />
           New
-        </button>
-        <button
-          onClick={onSave}
-          disabled={isSaving}
-          className="flex items-center gap-2 px-3 py-1.5 text-sm text-white bg-blue-600
-                     hover:bg-blue-700 rounded-lg transition-colors disabled:opacity-50"
-        >
-          <Save size={16} />
-          {isSaving ? "Saving..." : "Save"}
         </button>
       </div>
     </div>

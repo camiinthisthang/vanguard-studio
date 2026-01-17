@@ -1,66 +1,50 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
-import { ChatPanel, Message } from "@/components/studio/ChatPanel";
+import { useState, useCallback, useEffect, useRef } from "react";
+import { ChatPanel } from "@/components/studio/ChatPanel";
 import { CodePanel } from "@/components/studio/CodePanel";
 import { CanvasPanel } from "@/components/studio/CanvasPanel";
 import { ProjectHeader } from "@/components/studio/ProjectHeader";
-
-interface Project {
-  id: string;
-  name: string;
-  messages: Message[];
-  currentCode: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-function generateId() {
-  return Math.random().toString(36).substring(2, 9);
-}
-
-function createNewProject(): Project {
-  return {
-    id: generateId(),
-    name: "Untitled Project",
-    messages: [],
-    currentCode: "",
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  };
-}
+import {
+  Project,
+  Message,
+  generateId,
+  createNewProject,
+  saveProject as saveToStorage,
+  getProject,
+  getCurrentProjectId,
+  setCurrentProjectId,
+} from "@/lib/storage";
 
 export default function StudioPage() {
   const [project, setProject] = useState<Project>(createNewProject);
   const [isLoading, setIsLoading] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
-  const [isSaving, setIsSaving] = useState(false);
   const [previousCode, setPreviousCode] = useState<string | undefined>(undefined);
+  const canvasRef = useRef<HTMLIFrameElement>(null);
 
   // Load project from localStorage on mount
   useEffect(() => {
-    const saved = localStorage.getItem("vanguard_current_project");
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        setProject(parsed);
-        setLastSaved(new Date(parsed.updatedAt));
-      } catch (e) {
-        console.error("Failed to load saved project:", e);
+    const currentId = getCurrentProjectId();
+    if (currentId) {
+      const saved = getProject(currentId);
+      if (saved) {
+        setProject(saved);
+        setLastSaved(new Date(saved.updatedAt));
+        return;
       }
     }
+    // No saved project, create new one and set as current
+    const newProject = createNewProject();
+    setProject(newProject);
+    setCurrentProjectId(newProject.id);
   }, []);
 
-  // Save project to localStorage
+  // Save project to storage
   const saveProject = useCallback(() => {
-    setIsSaving(true);
-    const updated = {
-      ...project,
-      updatedAt: new Date().toISOString(),
-    };
-    localStorage.setItem("vanguard_current_project", JSON.stringify(updated));
+    saveToStorage(project);
+    setCurrentProjectId(project.id);
     setLastSaved(new Date());
-    setIsSaving(false);
   }, [project]);
 
   // Auto-save when project changes
@@ -171,12 +155,14 @@ export default function StudioPage() {
   const handleNewProject = () => {
     if (project.messages.length > 0 || project.currentCode) {
       const confirmed = window.confirm(
-        "Start a new project? Your current work will be saved."
+        "Start a new project? Your current work will be saved to your gallery."
       );
       if (!confirmed) return;
       saveProject();
     }
-    setProject(createNewProject());
+    const newProject = createNewProject();
+    setProject(newProject);
+    setCurrentProjectId(newProject.id);
     setLastSaved(null);
     setPreviousCode(undefined);
   };
@@ -192,9 +178,7 @@ export default function StudioPage() {
       <ProjectHeader
         projectName={project.name}
         onNameChange={handleNameChange}
-        onSave={saveProject}
         onNew={handleNewProject}
-        isSaving={isSaving}
         lastSaved={lastSaved}
       />
 

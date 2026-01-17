@@ -4,13 +4,7 @@ import { useEffect, useRef } from "react";
 import { MessageBubble } from "./MessageBubble";
 import { PromptInput } from "./PromptInput";
 import { Sparkles } from "lucide-react";
-
-export interface Message {
-  id: string;
-  role: "user" | "assistant";
-  content: string;
-  code?: string;
-}
+import { Message } from "@/lib/storage";
 
 interface ChatPanelProps {
   messages: Message[];
