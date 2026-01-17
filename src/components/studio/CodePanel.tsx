@@ -3,10 +3,9 @@
 import { useCallback, useState, useMemo, useEffect } from "react";
 import CodeMirror from "@uiw/react-codemirror";
 import { javascript } from "@codemirror/lang-javascript";
-import { Copy, Check, Code, ChevronUp, ChevronDown, BookOpen, ChevronRight } from "lucide-react";
+import { Copy, Check, Code, ChevronUp, ChevronDown } from "lucide-react";
 import { EditorView, Decoration, DecorationSet } from "@codemirror/view";
 import { StateField, StateEffect } from "@codemirror/state";
-import { findFrequentFunctions, FunctionDoc } from "@/lib/p5-docs";
 
 interface CodePanelProps {
   code: string;
@@ -113,7 +112,6 @@ const highlightField = StateField.define<DecorationSet>({
         const newDecorations: any[] = [];
 
         // Create decorations for each changed line
-        let pos = 0;
         const doc = tr.state.doc;
         for (let i = 0; i < doc.lines; i++) {
           if (changedLines.has(i)) {
@@ -146,14 +144,6 @@ export function CodePanel({ code, previousCode, onChange }: CodePanelProps) {
   const [editorView, setEditorView] = useState<EditorView | null>(null);
   const [showingChanges, setShowingChanges] = useState(false);
   const [currentBlockIndex, setCurrentBlockIndex] = useState(0);
-  const [showDocs, setShowDocs] = useState(true);
-  const [expandedFunc, setExpandedFunc] = useState<string | null>(null);
-
-  // Find frequently used p5.js functions
-  const frequentFunctions = useMemo(() => {
-    if (!code) return [];
-    return findFrequentFunctions(code, 4);
-  }, [code]);
 
   // Calculate change blocks when code updates from AI
   const changeBlocks = useMemo(() => {
@@ -248,7 +238,7 @@ export function CodePanel({ code, previousCode, onChange }: CodePanelProps) {
   }, [editorView]);
 
   return (
-    <div className="flex flex-col h-full bg-[#1e1e1e] relative">
+    <div className="flex flex-col h-full bg-[#1e1e1e]">
       {/* Header */}
       <div className="bg-[#252526] border-b border-[#3c3c3c]">
         <div className="h-10 flex items-center justify-between px-3">
@@ -328,123 +318,45 @@ export function CodePanel({ code, previousCode, onChange }: CodePanelProps) {
         )}
       </div>
 
-      {/* Editor + Docs Panel */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* Editor */}
-        <div className={`flex-1 overflow-auto ${frequentFunctions.length > 0 && showDocs ? 'border-r border-[#3c3c3c]' : ''}`}>
-          {code ? (
-            <CodeMirror
-              value={code}
-              height="100%"
-              extensions={[javascript(), highlightField, highlightTheme]}
-              onChange={onChange}
-              onCreateEditor={(view) => setEditorView(view)}
-              theme="dark"
-              basicSetup={{
-                lineNumbers: true,
-                highlightActiveLineGutter: true,
-                highlightActiveLine: true,
-                foldGutter: false,
-                dropCursor: false,
-                allowMultipleSelections: false,
-                indentOnInput: true,
-                bracketMatching: true,
-                closeBrackets: true,
-                autocompletion: true,
-                rectangularSelection: false,
-                crosshairCursor: false,
-                highlightSelectionMatches: false,
-                searchKeymap: false,
-              }}
-              className="text-sm h-full"
-              style={{ height: "100%" }}
-            />
-          ) : (
-            <div className="h-full flex items-center justify-center text-gray-500">
-              <div className="text-center px-4">
-                <Code size={32} className="mx-auto mb-3 opacity-50" />
-                <p className="text-sm">Your code will appear here</p>
-                <p className="text-xs mt-1 text-gray-600">
-                  Ask the AI to create something!
-                </p>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Function Documentation Panel */}
-        {frequentFunctions.length > 0 && showDocs && (
-          <div className="w-64 bg-[#1e1e1e] overflow-y-auto flex-shrink-0">
-            <div className="p-3 border-b border-[#3c3c3c] flex items-center justify-between sticky top-0 bg-[#1e1e1e] z-10">
-              <div className="flex items-center gap-2">
-                <BookOpen size={14} className="text-blue-400" />
-                <span className="text-xs text-gray-300 font-medium">Functions Used</span>
-              </div>
-              <button
-                onClick={() => setShowDocs(false)}
-                className="text-gray-500 hover:text-gray-300 text-xs"
-              >
-                Hide
-              </button>
-            </div>
-            <div className="p-2 space-y-1">
-              {frequentFunctions.map(({ func, count }) => (
-                <div key={func.name} className="rounded-lg overflow-hidden">
-                  <button
-                    onClick={() => setExpandedFunc(expandedFunc === func.name ? null : func.name)}
-                    className={`w-full text-left px-3 py-2 text-xs transition-colors ${
-                      expandedFunc === func.name
-                        ? 'bg-blue-500/20 text-blue-300'
-                        : 'bg-[#2d2d2d] text-gray-300 hover:bg-[#3c3c3c]'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="font-mono font-medium">{func.name}()</span>
-                      <div className="flex items-center gap-2">
-                        <span className="text-gray-500">{count}x</span>
-                        <ChevronRight
-                          size={12}
-                          className={`transition-transform ${expandedFunc === func.name ? 'rotate-90' : ''}`}
-                        />
-                      </div>
-                    </div>
-                  </button>
-                  {expandedFunc === func.name && (
-                    <div className="bg-[#252526] px-3 py-2 text-xs space-y-2">
-                      <p className="text-gray-300">{func.description}</p>
-                      {func.args.length > 0 && (
-                        <div className="space-y-1">
-                          <p className="text-gray-500 text-[10px] uppercase tracking-wide">Arguments:</p>
-                          {func.args.map((arg, i) => (
-                            <div key={i} className="flex gap-2">
-                              <span className="text-blue-400 font-mono">{arg.name}</span>
-                              <span className="text-gray-400">- {arg.description}</span>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                      {func.example && (
-                        <div className="mt-2 p-2 bg-[#1e1e1e] rounded font-mono text-gray-400">
-                          {func.example}
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              ))}
+      {/* Editor */}
+      <div className="flex-1 overflow-auto">
+        {code ? (
+          <CodeMirror
+            value={code}
+            height="100%"
+            extensions={[javascript(), highlightField, highlightTheme]}
+            onChange={onChange}
+            onCreateEditor={(view) => setEditorView(view)}
+            theme="dark"
+            basicSetup={{
+              lineNumbers: true,
+              highlightActiveLineGutter: true,
+              highlightActiveLine: true,
+              foldGutter: false,
+              dropCursor: false,
+              allowMultipleSelections: false,
+              indentOnInput: true,
+              bracketMatching: true,
+              closeBrackets: true,
+              autocompletion: true,
+              rectangularSelection: false,
+              crosshairCursor: false,
+              highlightSelectionMatches: false,
+              searchKeymap: false,
+            }}
+            className="text-sm h-full"
+            style={{ height: "100%" }}
+          />
+        ) : (
+          <div className="h-full flex items-center justify-center text-gray-500">
+            <div className="text-center px-4">
+              <Code size={32} className="mx-auto mb-3 opacity-50" />
+              <p className="text-sm">Your code will appear here</p>
+              <p className="text-xs mt-1 text-gray-600">
+                Ask the AI to create something!
+              </p>
             </div>
           </div>
-        )}
-
-        {/* Show docs toggle when hidden */}
-        {frequentFunctions.length > 0 && !showDocs && (
-          <button
-            onClick={() => setShowDocs(true)}
-            className="absolute right-2 top-14 p-2 bg-blue-500/20 text-blue-400 rounded-lg hover:bg-blue-500/30 transition-colors"
-            title="Show function docs"
-          >
-            <BookOpen size={14} />
-          </button>
         )}
       </div>
     </div>

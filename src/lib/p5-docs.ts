@@ -1,10 +1,20 @@
 // p5.js function documentation for educational tooltips
 
+export interface ArgDoc {
+  name: string;
+  description: string;
+  min?: number;
+  max?: number;
+  default?: number;
+  step?: number;
+}
+
 export interface FunctionDoc {
   name: string;
   description: string;
-  args: { name: string; description: string }[];
+  args: ArgDoc[];
   example?: string;
+  previewType?: 'shape' | 'color' | 'none';
 }
 
 export const p5Functions: Record<string, FunctionDoc> = {
@@ -13,67 +23,73 @@ export const p5Functions: Record<string, FunctionDoc> = {
     name: "arc",
     description: "Draws an arc (part of a circle or ellipse)",
     args: [
-      { name: "x", description: "x position of the center" },
-      { name: "y", description: "y position of the center" },
-      { name: "w", description: "width of the arc" },
-      { name: "h", description: "height of the arc" },
-      { name: "start", description: "angle to start (in radians)" },
-      { name: "stop", description: "angle to stop (in radians)" },
+      { name: "x", description: "x position of the center", min: 0, max: 100, default: 50 },
+      { name: "y", description: "y position of the center", min: 0, max: 100, default: 50 },
+      { name: "w", description: "width of the arc", min: 10, max: 100, default: 60 },
+      { name: "h", description: "height of the arc", min: 10, max: 100, default: 60 },
+      { name: "start", description: "angle to start (in radians)", min: 0, max: 6.28, default: 0, step: 0.1 },
+      { name: "stop", description: "angle to stop (in radians)", min: 0, max: 6.28, default: 3.14, step: 0.1 },
     ],
     example: "arc(50, 50, 80, 80, 0, PI)",
+    previewType: 'shape',
   },
   circle: {
     name: "circle",
     description: "Draws a circle on the screen",
     args: [
-      { name: "x", description: "x position of the center" },
-      { name: "y", description: "y position of the center" },
-      { name: "d", description: "diameter (size) of the circle" },
+      { name: "x", description: "x position of the center", min: 0, max: 100, default: 50 },
+      { name: "y", description: "y position of the center", min: 0, max: 100, default: 50 },
+      { name: "d", description: "diameter (size) of the circle", min: 5, max: 80, default: 40 },
     ],
     example: "circle(200, 200, 50)",
+    previewType: 'shape',
   },
   ellipse: {
     name: "ellipse",
     description: "Draws an oval/ellipse shape",
     args: [
-      { name: "x", description: "x position of the center" },
-      { name: "y", description: "y position of the center" },
-      { name: "w", description: "width" },
-      { name: "h", description: "height" },
+      { name: "x", description: "x position of the center", min: 0, max: 100, default: 50 },
+      { name: "y", description: "y position of the center", min: 0, max: 100, default: 50 },
+      { name: "w", description: "width", min: 5, max: 80, default: 50 },
+      { name: "h", description: "height", min: 5, max: 80, default: 30 },
     ],
     example: "ellipse(200, 200, 80, 50)",
+    previewType: 'shape',
   },
   rect: {
     name: "rect",
     description: "Draws a rectangle on the screen",
     args: [
-      { name: "x", description: "x position of top-left corner" },
-      { name: "y", description: "y position of top-left corner" },
-      { name: "w", description: "width" },
-      { name: "h", description: "height" },
+      { name: "x", description: "x position of top-left corner", min: 0, max: 100, default: 25 },
+      { name: "y", description: "y position of top-left corner", min: 0, max: 100, default: 25 },
+      { name: "w", description: "width", min: 5, max: 80, default: 50 },
+      { name: "h", description: "height", min: 5, max: 80, default: 40 },
     ],
     example: "rect(100, 100, 80, 60)",
+    previewType: 'shape',
   },
   square: {
     name: "square",
     description: "Draws a square (equal width and height)",
     args: [
-      { name: "x", description: "x position of top-left corner" },
-      { name: "y", description: "y position of top-left corner" },
-      { name: "s", description: "size (width and height)" },
+      { name: "x", description: "x position of top-left corner", min: 0, max: 100, default: 25 },
+      { name: "y", description: "y position of top-left corner", min: 0, max: 100, default: 25 },
+      { name: "s", description: "size (width and height)", min: 5, max: 80, default: 40 },
     ],
     example: "square(100, 100, 50)",
+    previewType: 'shape',
   },
   line: {
     name: "line",
     description: "Draws a straight line between two points",
     args: [
-      { name: "x1", description: "x of start point" },
-      { name: "y1", description: "y of start point" },
-      { name: "x2", description: "x of end point" },
-      { name: "y2", description: "y of end point" },
+      { name: "x1", description: "x of start point", min: 0, max: 100, default: 10 },
+      { name: "y1", description: "y of start point", min: 0, max: 100, default: 10 },
+      { name: "x2", description: "x of end point", min: 0, max: 100, default: 90 },
+      { name: "y2", description: "y of end point", min: 0, max: 100, default: 90 },
     ],
     example: "line(0, 0, 100, 100)",
+    previewType: 'shape',
   },
   triangle: {
     name: "triangle",
@@ -94,27 +110,30 @@ export const p5Functions: Record<string, FunctionDoc> = {
     name: "fill",
     description: "Sets the color used to fill shapes",
     args: [
-      { name: "r", description: "red (0-255) or grayscale" },
-      { name: "g", description: "green (0-255), optional" },
-      { name: "b", description: "blue (0-255), optional" },
+      { name: "r", description: "red (0-255) or grayscale", min: 0, max: 255, default: 100 },
+      { name: "g", description: "green (0-255), optional", min: 0, max: 255, default: 150 },
+      { name: "b", description: "blue (0-255), optional", min: 0, max: 255, default: 255 },
     ],
     example: "fill(255, 0, 0) // red",
+    previewType: 'color',
   },
   stroke: {
     name: "stroke",
     description: "Sets the outline color for shapes",
     args: [
-      { name: "r", description: "red (0-255) or grayscale" },
-      { name: "g", description: "green (0-255), optional" },
-      { name: "b", description: "blue (0-255), optional" },
+      { name: "r", description: "red (0-255) or grayscale", min: 0, max: 255, default: 0 },
+      { name: "g", description: "green (0-255), optional", min: 0, max: 255, default: 0 },
+      { name: "b", description: "blue (0-255), optional", min: 0, max: 255, default: 0 },
     ],
     example: "stroke(0) // black outline",
+    previewType: 'color',
   },
   strokeWeight: {
     name: "strokeWeight",
     description: "Sets the thickness of lines and outlines",
-    args: [{ name: "weight", description: "thickness in pixels" }],
+    args: [{ name: "weight", description: "thickness in pixels", min: 1, max: 20, default: 2 }],
     example: "strokeWeight(4) // 4px thick",
+    previewType: 'shape',
   },
   background: {
     name: "background",

@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus, Pencil, Check, X, Cloud, Image as ImageIcon } from "lucide-react";
+import { Plus, Pencil, Check, X, Cloud, Image as ImageIcon, BookOpen } from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";
 
@@ -9,6 +9,8 @@ interface ProjectHeaderProps {
   onNameChange: (name: string) => void;
   onNew: () => void;
   lastSaved?: Date | null;
+  showDocs?: boolean;
+  onToggleDocs?: () => void;
 }
 
 export function ProjectHeader({
@@ -16,6 +18,8 @@ export function ProjectHeader({
   onNameChange,
   onNew,
   lastSaved,
+  showDocs,
+  onToggleDocs,
 }: ProjectHeaderProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(projectName);
@@ -107,6 +111,20 @@ export function ProjectHeader({
         </div>
 
         <div className="w-px h-5 bg-gray-200" />
+
+        {onToggleDocs && (
+          <button
+            onClick={onToggleDocs}
+            className={`flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg transition-colors ${
+              showDocs
+                ? "text-blue-600 bg-blue-50"
+                : "text-gray-600 hover:bg-gray-100"
+            }`}
+          >
+            <BookOpen size={16} />
+            {showDocs ? "Hide Guide" : "Show Guide"}
+          </button>
+        )}
 
         <Link
           href="/gallery"

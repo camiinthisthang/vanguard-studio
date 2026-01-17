@@ -11,6 +11,7 @@ import {
   Play,
   Code,
   Clock,
+  Check,
 } from "lucide-react";
 import {
   Project,
@@ -184,14 +185,21 @@ export default function GalleryPage() {
                     <div className="flex items-center gap-1">
                       <button
                         onClick={(e) => handleShare(project, e)}
-                        className={`p-2 rounded-lg transition-colors ${
+                        className={`flex items-center gap-1 px-2 py-1.5 rounded-lg transition-all ${
                           copiedId === project.id
                             ? "bg-green-100 text-green-600"
                             : "text-gray-400 hover:bg-gray-100 hover:text-gray-600"
                         }`}
                         title={copiedId === project.id ? "Link copied!" : "Share"}
                       >
-                        <Share2 size={16} />
+                        {copiedId === project.id ? (
+                          <>
+                            <Check size={16} />
+                            <span className="text-xs font-medium">Copied!</span>
+                          </>
+                        ) : (
+                          <Share2 size={16} />
+                        )}
                       </button>
                       <button
                         onClick={(e) => handleDelete(project.id, e)}

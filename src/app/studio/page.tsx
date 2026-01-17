@@ -5,6 +5,7 @@ import { ChatPanel } from "@/components/studio/ChatPanel";
 import { CodePanel } from "@/components/studio/CodePanel";
 import { CanvasPanel } from "@/components/studio/CanvasPanel";
 import { ProjectHeader } from "@/components/studio/ProjectHeader";
+import { FunctionDocsPanel } from "@/components/studio/FunctionDocsPanel";
 import {
   Project,
   Message,
@@ -21,6 +22,7 @@ export default function StudioPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [previousCode, setPreviousCode] = useState<string | undefined>(undefined);
+  const [showDocs, setShowDocs] = useState(true);
   const canvasRef = useRef<HTMLIFrameElement>(null);
 
   // Load project from localStorage on mount
@@ -180,12 +182,14 @@ export default function StudioPage() {
         onNameChange={handleNameChange}
         onNew={handleNewProject}
         lastSaved={lastSaved}
+        showDocs={showDocs}
+        onToggleDocs={() => setShowDocs(!showDocs)}
       />
 
       {/* Main Content - Split View */}
       <div className="flex-1 flex overflow-hidden">
         {/* Left Panel - Chat */}
-        <div className="w-[400px] min-w-[320px] border-r border-gray-200 flex-shrink-0">
+        <div className="w-[320px] min-w-[280px] border-r border-gray-200 flex-shrink-0">
           <ChatPanel
             messages={project.messages}
             onSendMessage={handleSendMessage}
@@ -193,7 +197,7 @@ export default function StudioPage() {
           />
         </div>
 
-        {/* Right Panel - Code + Canvas */}
+        {/* Middle Panel - Code + Canvas stacked */}
         <div className="flex-1 flex flex-col min-w-0">
           {/* Code Editor */}
           <div className="h-1/2 border-b border-gray-700">
@@ -213,6 +217,16 @@ export default function StudioPage() {
             />
           </div>
         </div>
+
+        {/* Right Panel - Function Docs (full height) */}
+        {showDocs && project.currentCode && (
+          <div className="w-[340px] border-l border-gray-700 flex-shrink-0">
+            <FunctionDocsPanel
+              code={project.currentCode}
+              onClose={() => setShowDocs(false)}
+            />
+          </div>
+        )}
       </div>
     </div>
   );
